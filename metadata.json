@@ -1,0 +1,7 @@
+{
+  "name": "Gemini Tiling HUD",
+  "description": "An interactive heads-up display that uses a tiling system to analyze screenshare images, camera captures, and text prompts with Gemini. Features a dynamic A-Frame 3D scene that visualizes the AI's output.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
