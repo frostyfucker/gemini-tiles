@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import Tile from './Tile';
 
@@ -6,11 +7,12 @@ interface ResponseTileProps {
   response: string;
   isLoading: boolean;
   error: string | null;
+  className?: string;
 }
 
-const ResponseTile: React.FC<ResponseTileProps> = ({ response, isLoading, error }) => {
+const ResponseTile: React.FC<ResponseTileProps> = ({ response, isLoading, error, className }) => {
   return (
-    <Tile title="Gemini Analysis">
+    <Tile title="Gemini Analysis" className={className}>
       <div className="absolute inset-0 p-4 overflow-y-auto">
         {isLoading && (
           <div className="flex items-center justify-center h-full">

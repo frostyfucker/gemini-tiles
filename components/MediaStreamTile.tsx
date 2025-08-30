@@ -48,7 +48,7 @@ const MediaStreamTile = forwardRef((props: MediaStreamTileProps, ref) => {
           />
         ) : (
           <div className="text-slate-500 text-center p-4">
-            <p>{title === 'Camera Feed' ? 'Camera Off' : 'Not Sharing Screen'}</p>
+            <p>{title} Off</p>
             <p className="text-xs mt-2 text-slate-400">Click tile to select for analysis</p>
           </div>
         )}

@@ -9,10 +9,14 @@ interface ControlsProps {
     setPrompt: (prompt: string) => void;
     onAnalyze: () => void;
     isLoading: boolean;
-    isCameraOn: boolean;
+    isFrontCameraOn: boolean;
+    isRearCameraOn: boolean;
     isScreenOn: boolean;
-    onStartCamera: () => void;
-    onStopCamera: () => void;
+    hasMultipleCameras: boolean;
+    onStartFrontCamera: () => void;
+    onStopFrontCamera: () => void;
+    onStartRearCamera: () => void;
+    onStopRearCamera: () => void;
     onStartScreenShare: () => void;
     onStopScreenShare: () => void;
 }
@@ -22,10 +26,14 @@ const Controls: React.FC<ControlsProps> = ({
     setPrompt,
     onAnalyze,
     isLoading,
-    isCameraOn,
+    isFrontCameraOn,
+    isRearCameraOn,
     isScreenOn,
-    onStartCamera,
-    onStopCamera,
+    hasMultipleCameras,
+    onStartFrontCamera,
+    onStopFrontCamera,
+    onStartRearCamera,
+    onStopRearCamera,
     onStartScreenShare,
     onStopScreenShare,
 }) => {
@@ -44,16 +52,23 @@ const Controls: React.FC<ControlsProps> = ({
                      <p className="text-xs text-slate-500">Select an input tile by clicking on it. Ask for a 3D visualization to see objects appear in the 3D panel!</p>
                 </div>
                 <div className="flex flex-col md:flex-row gap-2">
-                    <div className="flex gap-2">
-                        {isCameraOn ? (
-                            <button onClick={onStopCamera} className="w-full md:w-auto flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><StopIcon/> Camera</button>
+                    <div className="flex gap-2 flex-wrap justify-center">
+                        {isFrontCameraOn ? (
+                            <button onClick={onStopFrontCamera} className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><StopIcon/> Front Cam</button>
                         ) : (
-                            <button onClick={onStartCamera} className="w-full md:w-auto flex items-center justify-center gap-2 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><CameraIcon/> Camera</button>
+                            <button onClick={onStartFrontCamera} className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><CameraIcon/> Front Cam</button>
+                        )}
+                        {hasMultipleCameras && (
+                            isRearCameraOn ? (
+                                <button onClick={onStopRearCamera} className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><StopIcon/> Rear Cam</button>
+                            ) : (
+                                <button onClick={onStartRearCamera} className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><CameraIcon/> Rear Cam</button>
+                            )
                         )}
                         {isScreenOn ? (
-                             <button onClick={onStopScreenShare} className="w-full md:w-auto flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><StopIcon/> Screen</button>
+                             <button onClick={onStopScreenShare} className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><StopIcon/> Screen</button>
                         ) : (
-                             <button onClick={onStartScreenShare} className="w-full md:w-auto flex items-center justify-center gap-2 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><ScreenIcon/> Screen</button>
+                             <button onClick={onStartScreenShare} className="flex-grow md:flex-grow-0 flex items-center justify-center gap-2 bg-blue-500/80 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-md transition-all duration-200"><ScreenIcon/> Screen</button>
                         )}
                     </div>
                      <button
@@ -65,7 +80,7 @@ const Controls: React.FC<ControlsProps> = ({
                             <>
                             <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8_0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             Analyzing...
                             </>

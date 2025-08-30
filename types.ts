@@ -1,5 +1,7 @@
-
+// This interface defines the shape of a single 3D object entity
+// that can be rendered in the A-Frame scene.
 export interface AFrameEntity {
+  id: string;
   geometry: string;
   color: string;
   position: string;
@@ -7,9 +9,14 @@ export interface AFrameEntity {
   rotation?: string;
 }
 
-// FIX: Define A-Frame custom elements for TypeScript JSX to resolve type errors.
-// By placing this in a central types file, we ensure it's globally available across the project.
+// This global declaration block extends TypeScript's JSX support to recognize
+// A-Frame's custom HTML elements (e.g., <a-scene>, <a-entity>). This prevents
+// "Property 'a-scene' does not exist on type 'JSX.IntrinsicElements'" errors.
 declare global {
+  // Declares the global AFRAME object provided by the A-Frame library script.
+  // This prevents "Cannot find name 'AFRAME'" errors in components that interact with it.
+  const AFRAME: any;
+
   namespace JSX {
     interface IntrinsicElements {
       'a-scene': any;
@@ -18,6 +25,7 @@ declare global {
       'a-text': any;
       'a-plane': any;
       'a-sky': any;
+      'a-cursor': any;
     }
   }
 }

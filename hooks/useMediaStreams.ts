@@ -1,33 +1,76 @@
-
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 export const useMediaStreams = () => {
-    const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+    const [frontCameraStream, setFrontCameraStream] = useState<MediaStream | null>(null);
+    const [rearCameraStream, setRearCameraStream] = useState<MediaStream | null>(null);
     const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
+    const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
 
-    const cameraStreamRef = useRef<MediaStream | null>(null);
+    const frontCameraStreamRef = useRef<MediaStream | null>(null);
+    const rearCameraStreamRef = useRef<MediaStream | null>(null);
     const screenStreamRef = useRef<MediaStream | null>(null);
+
+    useEffect(() => {
+        const checkForMultipleCameras = async () => {
+            try {
+                if (!navigator.mediaDevices?.enumerateDevices) {
+                    console.log("enumerateDevices() not supported.");
+                    return;
+                }
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                setHasMultipleCameras(videoDevices.length > 1);
+            } catch (err) {
+                console.error("Could not enumerate devices:", err);
+            }
+        };
+        
+        checkForMultipleCameras();
+        navigator.mediaDevices.addEventListener('devicechange', checkForMultipleCameras);
+        
+        return () => {
+            navigator.mediaDevices.removeEventListener('devicechange', checkForMultipleCameras);
+        };
+    }, []);
 
     const stopStream = (stream: MediaStream | null) => {
         stream?.getTracks().forEach(track => track.stop());
     };
 
-    const startCamera = useCallback(async () => {
+    const startFrontCamera = useCallback(async () => {
         try {
-            stopStream(cameraStreamRef.current);
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-            cameraStreamRef.current = stream;
-            setCameraStream(stream);
+            stopStream(frontCameraStreamRef.current);
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+            frontCameraStreamRef.current = stream;
+            setFrontCameraStream(stream);
         } catch (err) {
-            console.error("Error accessing camera:", err);
-            alert("Could not access camera. Please check permissions.");
+            console.error("Error accessing front camera:", err);
+            alert("Could not access front camera. Please check permissions.");
         }
     }, []);
 
-    const stopCamera = useCallback(() => {
-        stopStream(cameraStreamRef.current);
-        cameraStreamRef.current = null;
-        setCameraStream(null);
+    const stopFrontCamera = useCallback(() => {
+        stopStream(frontCameraStreamRef.current);
+        frontCameraStreamRef.current = null;
+        setFrontCameraStream(null);
+    }, []);
+
+    const startRearCamera = useCallback(async () => {
+        try {
+            stopStream(rearCameraStreamRef.current);
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } }, audio: false });
+            rearCameraStreamRef.current = stream;
+            setRearCameraStream(stream);
+        } catch (err) {
+            console.error("Error accessing rear camera:", err);
+            alert("Could not access rear camera. Please check permissions or ensure one is available.");
+        }
+    }, []);
+
+    const stopRearCamera = useCallback(() => {
+        stopStream(rearCameraStreamRef.current);
+        rearCameraStreamRef.current = null;
+        setRearCameraStream(null);
     }, []);
 
     const startScreenShare = useCallback(async () => {
@@ -37,13 +80,11 @@ export const useMediaStreams = () => {
             screenStreamRef.current = stream;
             setScreenStream(stream);
 
-            // Add a listener to stop our stream state when the browser's native "Stop sharing" button is clicked
             stream.getVideoTracks()[0].addEventListener('ended', () => {
                  stopScreenShare();
             });
         } catch (err) {
             console.error("Error accessing screen share:", err);
-            // Don't alert for screen share cancellation
         }
     }, []);
 
@@ -54,10 +95,14 @@ export const useMediaStreams = () => {
     }, []);
 
     return {
-        cameraStream,
+        frontCameraStream,
+        rearCameraStream,
         screenStream,
-        startCamera,
-        stopCamera,
+        hasMultipleCameras,
+        startFrontCamera,
+        stopFrontCamera,
+        startRearCamera,
+        stopRearCamera,
         startScreenShare,
         stopScreenShare,
     };

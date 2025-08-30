@@ -1,7 +1,8 @@
 {
-  "name": "Gemini Tiling HUD",
-  "description": "An interactive heads-up display that uses a tiling system to analyze screenshare images, camera captures, and text prompts with Gemini. Features a dynamic A-Frame 3D scene that visualizes the AI's output.",
+  "name": "LensCraft AI",
+  "description": "LensCraft AI: An interactive HUD that uses AI to analyze camera feeds and reconstruct them into interactive 3D scenes in real-time.",
   "requestFramePermissions": [
-    "camera"
+    "camera",
+    "display-capture"
   ]
 }
