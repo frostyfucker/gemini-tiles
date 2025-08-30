@@ -12,33 +12,33 @@ const PuterTile: React.FC = () => {
   const isInitialized = useRef(false);
 
   useEffect(() => {
-    // Attempt to initialize Puter. We use a ref to prevent re-initialization on re-renders.
-    const initialize = () => {
+    // The Puter.js script is loaded externally and may not be ready when this component mounts.
+    // We'll use an interval to check for the `puter` object on the window.
+    const intervalId = setInterval(() => {
+      // Once `puter` is available, initialize it and stop checking.
       if (typeof puter !== 'undefined' && containerRef.current && !isInitialized.current) {
         puter.init({
           root: containerRef.current,
         });
         isInitialized.current = true;
+        clearInterval(intervalId); // Stop the interval
       }
-    };
-    
-    // The external script might load after the component mounts.
-    // We can poll for it, or just use a timeout as a simple solution.
-    const timeoutId = setTimeout(initialize, 200);
+    }, 100); // Check every 100ms
 
+    // Cleanup function to clear the interval and the Puter instance if the component unmounts.
     return () => {
-      clearTimeout(timeoutId);
-      // No official cleanup method is documented. Clearing the container is the safest option
-      // to remove the UI and prevent some memory leaks from DOM nodes.
+      clearInterval(intervalId);
       if (containerRef.current) {
+        // Puter doesn't provide a dedicated cleanup/destroy method.
+        // The safest way to remove it is to clear the container's inner HTML.
         containerRef.current.innerHTML = '';
       }
       isInitialized.current = false;
     };
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount.
 
   return (
-    <Tile title="Puter 💻" className="p-0">
+    <Tile title="Puter 💻">
       <div ref={containerRef} className="w-full h-full bg-black" />
     </Tile>
   );

@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import Tile from './Tile';
-// FIX: Import the AFrameEntity type, as it is defined in a module.
-// FIX: Use a regular import to ensure global A-Frame types are loaded, which fixes errors with custom JSX elements.
+// FIX: To resolve errors with A-Frame's custom JSX elements (e.g., <a-scene>),
+// we must ensure the global type augmentations from `../types.ts` are loaded.
+// A direct side-effect import guarantees the module is processed. A named import
+// that is only used for types can be elided by the compiler, failing to apply the types.
+import '../types';
 import { AFrameEntity } from '../types';
 
 interface AFrameTileProps {
@@ -26,7 +29,7 @@ const AFrameTile: React.FC<AFrameTileProps> = ({ entities }) => {
         this.el.sceneEl.addEventListener('mousedown', this.onMouseDown);
       },
 
-      onMouseDown: function (evt) {
+      onMouseDown: function (evt: { button: number; }) {
         // Only trigger on left click
         if (evt.button !== 0) return;
 
@@ -37,7 +40,7 @@ const AFrameTile: React.FC<AFrameTileProps> = ({ entities }) => {
           // If not holding an object, try to grab one.
           const intersectedEls = this.cursor.components.raycaster.intersectedEls;
           // Find the first intersected element that is actually a grabbable object
-          const intersectedEl = intersectedEls.find(el => el.classList.contains('grabbable'));
+          const intersectedEl = intersectedEls.find((el: { classList: { contains: (arg0: string) => any; }; }) => el.classList.contains('grabbable'));
           
           if (intersectedEl) {
             this.grab(intersectedEl);
@@ -45,7 +48,7 @@ const AFrameTile: React.FC<AFrameTileProps> = ({ entities }) => {
         }
       },
 
-      grab: function (el) {
+      grab: function (el: { id: any; object3D: any; setAttribute: (arg0: string, arg1: { x: number; y: number; z: number; }) => void; }) {
         this.grabbedEl = el;
         
         // Make raycaster ignore the grabbed object so we can detect the ground
@@ -70,9 +73,18 @@ const AFrameTile: React.FC<AFrameTileProps> = ({ entities }) => {
 
         if (intersection) {
           const pos = intersection.point;
-          // Account for object's scale to place it on top of the ground, not in it
-          const objectHeight = this.grabbedEl.getAttribute('scale').y / 2;
-          this.grabbedEl.setAttribute('position', { x: pos.x, y: pos.y + objectHeight, z: pos.z });
+          
+          // To correctly place the object on the ground, we calculate its world-space
+          // bounding box to get its actual height, regardless of rotation.
+          const THREE = AFRAME.THREE;
+          const box = new THREE.Box3().setFromObject(this.grabbedEl.object3D);
+          const size = new THREE.Vector3();
+          box.getSize(size);
+          const objectHalfHeight = size.y / 2;
+
+          // Set the position to the intersection point, adjusted by half the object's height
+          // so its bottom rests on the ground.
+          this.grabbedEl.setAttribute('position', { x: pos.x, y: pos.y + objectHalfHeight, z: pos.z });
         }
         // If no intersection, it's already detached and will maintain its last transform in world space.
 
@@ -83,7 +95,7 @@ const AFrameTile: React.FC<AFrameTileProps> = ({ entities }) => {
         this.grabbedEl = null;
       },
 
-      onRotate: function (evt) {
+      onRotate: function (evt: { deltaY: number; }) {
         if (!this.grabbedEl) return;
         const rotation = this.grabbedEl.getAttribute('rotation');
         const rotationSpeed = 10;
@@ -104,9 +116,9 @@ const AFrameTile: React.FC<AFrameTileProps> = ({ entities }) => {
   }, []); // Run only once on mount
 
   return (
-    <Tile title="3D Visualization" className="p-0">
+    <Tile title="3D Visualization">
       <div className="w-full h-full">
-        <a-scene embedded className="w-full h-full">
+        <a-scene className="w-full h-full">
           <a-assets>
             <img id="grid" src="https://raw.githubusercontent.com/aframevr/aframe/master/examples/showcase/anime-UI/assets/grid.png" crossOrigin="anonymous"/>
           </a-assets>
@@ -150,7 +162,7 @@ const AFrameTile: React.FC<AFrameTileProps> = ({ entities }) => {
           <a-entity light="type: ambient; color: #888;"></a-entity>
           <a-entity light="type: directional; color: #FFF; intensity: 0.5" position="-1 1 2"></a-entity>
           
-          <a-entity id="player-camera" camera look-controls wasd-controls="true" position="0 1.6 4" grab-manager>
+          <a-entity id="player-camera" camera="true" look-controls="pointerLockEnabled: true" wasd-controls="fly: false; acceleration: 40;" position="0 1.6 4" grab-manager>
             <a-cursor raycaster="objects: .grabbable, #ground; far: 20;"></a-cursor>
           </a-entity>
         </a-scene>

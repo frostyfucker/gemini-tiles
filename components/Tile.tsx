@@ -36,7 +36,7 @@ const Tile: React.FC<TileProps> = ({ children, title, className = '', isSelected
       <h2 className="bg-slate-900/70 text-cyan-300 p-2 text-sm font-semibold tracking-wider border-b border-cyan-500/30">
         {title}
       </h2>
-      <div className="p-4 flex-grow relative">
+      <div className="flex-grow relative">
         {children}
       </div>
     </div>
